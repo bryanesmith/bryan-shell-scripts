@@ -1,0 +1,43 @@
+===== DESCRIPTION
+Collection of some of my more useful shell scripts.
+
+===== CONTENTS
+
+  * build_templates: create files from one or more templates. (Includes Bash Test Simple tests: build-templates-tsh.zip)
+
+  * Shell scripts for identifying, refactoring and deduplicating XSLT templates.
+
+    - xtloc.pl: Finds a template by keywords (attribute values) and reports starting and ending line.
+
+    - xtdesc.pl: Prints one entry per template in source file with all attribute values for template. (Useful for input to xtloc.pl)
+
+    - xtchanges.sh: Given two XSLT files, identifies all the templates in the first and classifies each as 'new', 'different' or 'same' based on corresponding templates in the second file. (Requires xtloc.pl, xtdesc.pl and bdiff.sh in path.)
+
+    - xtchanges-example.sh: sample batch file using xtchanges.sh.
+
+  * Variety of scripts to help with CVS
+
+    - cvs_mv.sh: recursively move all the files from one directory to another.
+
+    - cvs_rm.sh: remove one or more files from CVS and from disk.
+
+    - cvs_changes.sh: Prints any uncommitted changes recursively within current directory.
+
+    - cvs_unadded.sh: Prints any untracked changes recursively within current directory.
+
+  * bdiff.sh: Perform a diff between two blocks of text in two separate filesby line numbers.
+
+  * Decrypt and encrypt file or directory using gpg, tar archiving and gzip compression.
+
+    - encrypt.sh
+
+    - decrypt.sh
+
+  * backup-media.sh: Conditionally backups up mounted media a maximum of once a day, and performs backup rotation.
+
+  * Tools for sorting and uniquifying.
+    - argsu: sorts and uniquifies arguments
+
+    - catsu: sorts and uniquifies contents of file
+
+check-for-files-with-same-path.sh: looks in multiple directories for any files with identical relative paths.
