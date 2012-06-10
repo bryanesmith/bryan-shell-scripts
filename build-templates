@@ -1,0 +1,309 @@
+#!/usr/bin/perl -w
+use strict;
+use File::Basename;
+use File::Spec;
+use File::Spec::Functions;
+
+my $VERSION = "1.0";
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+my $exec = $0;
+my $quiet = 0;
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+sub usage {
+  print STDERR <<MYUSAGE;
+USAGE
+  $exec -o [PATH TO WRITE FILES] ( -f [VALUE] ... ) (OPTIONAL PARAMETERS)
+
+DESCRIPTION
+  Using one or more template files, outputs files to specified location with the appropriate values for specified variables.
+
+  This utility is intended for building tools that require templating. In general, you will probably want to write wrapper scripts instead of invoking this command directly. 
+
+REQUIRED ARGS
+  -o, --out         The absolute path to the directory to which to write the files. Make sure it exists!
+  
+  -t, --templates   A glob that matches variables. At least one is required, but multiple can be specified. A union of all globs is used.
+
+OPTIONAL ARGS
+  -q, --quiet       Minimal output.
+  -h, --help        Print this information and exit normally.
+  -V, --version     Print version number and exit normally.
+  -v, --textvar     Specifiy a variable name and value. See TEXT VARIABLES for more information.
+  -f, --filenamevar  Specify a variable name that appears in the template filename and a value. See FILENAME VARIABLES for more information.
+
+TEXT VARIABLES
+  This is the major function of using this tool: your plain-text templates contain variables with the form:
+
+  [template:SOME_NAME]
+
+  When you run:
+
+  % $exec (REQ. PARAMS...) -v SOME_NAME "Bryan Smith"
+
+  The result is that each instance of the variable in each template will be replaced with thespecified variable.
+
+  Note that if a variable exists but is not satisfied by the user, then an error occurs. See EXIT CODES.
+
+FILENAME VARIABLES 
+  In some cases, you may wish to generate files with dynamically-generated names. In this case, you can name the templates however you want, though an obvious placeholder will make your job easier. E.g.,
+
+  about-name.html
+
+  When you run:
+
+  % $exec (REQ. PARAMS...) -f '-name' '-bryan'
+
+  The generated file will have the name:
+
+  about-bryan.html
+
+  Or you might wish to generate about.html:
+
+  % $exec (REQ. PARAMS...) -f '-name' ''
+
+  Note: this will apply to each template, not just the one you are thinking about. =)
+
+EXAMPLE
+  $exec -o /home/bryan/public_html/new_site/ -t /home/bryan/Templates/html5/*.html.template -f '.template' '' -v title 'My new site'
+
+EXIT CODES
+  0: Exited normally.
+  1: Unrecognized parameter or wrong number of parameters.
+  2: Missing required arguments.
+  3: Output directory does not exist or is not writable.
+  4: Output files exist (must be moved).
+  5: Unsatisfied template variable.
+  6: No templates found
+
+MYUSAGE
+
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+sub error {
+  my ( $code, $msg ) = @_;
+
+  print STDERR "\n" . "$exec error: " . $msg . "\n\n";
+  usage() unless $quiet;
+
+  exit $code;
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+sub readFile {
+  my ( $template ) = shift;
+
+  open(TEMPLATE, $template) or error(4, "Unable to open template [$template]: $!");
+  my @lines = <TEMPLATE>;
+  close(TEMPLATE);  
+
+  @lines;
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+sub outputFilePathForTemplate {
+
+  my ( $templatePath, $filenamevarsHashRef, $outputDir ) = @_;
+  my $templateFileName = basename( $templatePath );
+
+  # Substitute filename vars
+  for my $var ( keys ( %$filenamevarsHashRef ) ) {
+    my $val = $$filenamevarsHashRef{ $var };
+    $templateFileName =~ s/\Q$var\U/$val/;
+  }
+
+  return catfile( $outputDir, $templateFileName );
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+sub var2templateVarRegex {
+  my $name = shift;
+  return qr/\[template:${name}\]/;
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+sub substituteTemplateVariables {
+  my ( $line, $textvarsHashRef ) = @_; 
+ 
+  # Subsitute all variables
+  for my $key ( keys( %$textvarsHashRef ) ) {
+    my $val = $$textvarsHashRef{ $key };
+    my $var = var2templateVarRegex( $key );
+    $line =~ s/$var/$val/g;
+  }
+
+  # Check if any unsatisfied variables
+  if ( $line =~ m/\[template:(\w+)\]/ ) {
+    error( 5, "Unsatisfied template variable ${1}: $line" );
+  }
+
+  return $line;
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+sub getTemplates {
+ 
+  my $templateGlobsArrRef = shift;
+  my @templates;
+
+  # Since union, deduplicate
+  for my $templateGlob ( @$templateGlobsArrRef ) {
+
+    for my $template ( glob( $templateGlob ) ) {
+      # Normalize: make everything absolute path. Normalize so can
+      # deduplicate.
+      $template = File::Spec->rel2abs( $template );
+      
+      push (@templates, $template ) unless grep( /\Q$template\U/, @templates );
+    }
+  }
+
+  return @templates;
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+sub buildTemplate {
+
+  my ( $template, $output, $filenamevarsHashRef, $textvarsHashRef ) = @_;
+
+  my $outputFilePath = outputFilePathForTemplate( $template, $filenamevarsHashRef, $output );
+
+  if ( -e $outputFilePath ) {
+    error( 5, "File [$outputFilePath] already exists. Please move it (and other distfiles) since this utility will not clobber existing files." );
+  }
+  
+  my @templateLines = readFile( $template );
+
+  print "Writing: $outputFilePath" . "\n" unless $quiet;
+  
+  open OUT, ">", $outputFilePath or error( 4, "Cannot write output file [$outputFilePath]: $!" );
+  
+  for my $line ( @templateLines ) {
+    chomp $line;
+    $line = substituteTemplateVariables( $line, $textvarsHashRef );
+    print OUT $line . "\n";
+  }
+  
+  close OUT;
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# Make sure argument has enough vals
+sub verifyArgVals {
+
+  my ( $varName, $reqVarCount, $reqLength, $argLength ) = @_;
+
+  my $valCountStr;
+  if ( $reqVarCount == 1 ) {
+    $valCountStr = 'a value';
+  } else {
+    $valCountStr = "$reqVarCount values";
+  }
+  
+  if ( $reqLength > $argLength ) {
+    error( 1, "The argument \"$varName\" requires ${valCountStr}, but no more parameters." );
+  }
+
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+sub index2ReqLen {
+  my ( $index, $reqArgs ) = @_;
+  return $index + $reqArgs - 1;
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# Process parameters
+my $i = 0;
+my $argvLen = scalar( @ARGV );
+
+my $output;
+my @templateGlobs = ();
+my %textvars = ();
+my %filenamevars = ();
+
+# For each parameter...
+while ( $i < $argvLen ) {
+  
+  my $name = $ARGV[ $i ];
+
+  # --- Empty params ---
+  if ( $name eq '-h' || $name eq '--help' ) {
+    usage();
+    exit 0;
+  } elsif ( $name eq '-V' || $name eq '--version' ) {
+    print "$exec - version $VERSION" . "\n";
+    exit 0;
+  } elsif ( $name eq '-q' || $name eq '--quiet' ) {
+    $quiet = 1;
+    $i++;
+    next;
+  }
+
+  my $reqVals;
+
+  # --- Name/value params ---
+  if ( $name eq '-o' || $name eq '--out' ) {
+
+    $reqVals = 1;
+    verifyArgVals( $name, $reqVals, index2ReqLen( $i, $reqVals ), $argvLen );
+    $output = $ARGV[ $i + 1 ];
+
+  } elsif ( $name eq '-t' || $name eq '--templates' ) {
+   
+    $reqVals = 1;
+    verifyArgVals( $name, $reqVals, index2ReqLen( $i, $reqVals ), $argvLen );
+    push( @templateGlobs, $ARGV[ $i + 1 ] );
+
+  } elsif ( $name eq '-v' || $name eq '--textvar' ) {
+   
+    $reqVals = 2;
+    verifyArgVals( $name, $reqVals, index2ReqLen( $i, $reqVals ), $argvLen );
+    $textvars{ $ARGV[ $i + 1 ] } = $ARGV[ $i + 2 ];
+    
+  } elsif ( $name eq '-f' || $name eq '--filenamevar' ) {
+    
+    $reqVals = 2;
+    verifyArgVals( $name, $reqVals, index2ReqLen( $i, $reqVals ), $argvLen );
+    $filenamevars{ $ARGV[ $i + 1 ] } = $ARGV[ $i + 2 ];
+
+  } else {
+    error( 1, "Unrecognized parameter: $name" );
+  }
+  
+  $i += ( 1 + $reqVals );
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# Verify params
+if ( ! $output ) {
+  error( 2, "You must specify the directory to which to write the distfiles (-o)." );
+}
+
+if ( scalar( @templateGlobs ) == 0 ) {
+  error( 2, "You must specify the templates to use (-t)." );
+}
+
+# Mark sure output directory exists
+unless( -d $output ) {
+  error( 3, "$output must exist and be a directory." );
+}
+
+unless( -w $output ) {
+  error( 3, "$output must exist and be a directory." );
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# Build templates
+my @templates = getTemplates( \@templateGlobs );
+
+if ( scalar( @templates ) == 0 ) {
+  error( 6, "No templates found." );
+}
+
+for my $template ( @templates ) {
+  buildTemplate( $template, $output, \%filenamevars, \%textvars );
+}
+
