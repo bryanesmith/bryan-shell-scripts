@@ -1,0 +1,125 @@
+#!/bin/sh
+
+# Copyright 2010, The Regents of The University of Michigan, All Rights Reserved
+#
+# Permission is hereby granted, free of charge, to any person
+# obtaining a copy of this software and associated documentation files
+# (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge,
+# publish, distribute, sublicense, and/or sell copies of the Software,
+# and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+# BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Diffs two text files code blocks.
+#
+# Bryan Smith - bryanesmith@gmail.com
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+usage() {
+  cat <<MYUSAGE
+
+USAGE 
+  bdiff.sh [file] [line start] [line end] [file] [line start] [line end]
+
+DESCRIPTION
+  Compares two text file regions specified by line numbers.
+
+EXAMPLES
+
+  bdiff.sh file1 3 23 file2 7 27
+    This will diff lines 3-23 in file1 with lines 7-27 in file2
+
+  bdiff.sh file1 file2 7 27
+    This will fail with exit code of 1 since all parameters are
+    required!
+
+EXIT CODES
+  0: Exitted normally
+  1: Wrong number of arguments
+  2: File not found
+  3: Temporary file already exists
+
+MYUSAGE
+
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+error() {
+    if [ "$#" -eq "2" ]; then
+        echo
+        echo "ERROR: $2"
+    fi
+
+    usage
+
+    exit $1
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+assertexists() {
+  if [ ! -e $1 ]; then
+    error 2 "Error: $1 not found"
+  fi 
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+checktempfileexists() {
+  if [ -e $1 ]; then
+    error 3 "Temporary file ($1) already exists. I'm being super safe, so please move this file so I can do my job. (I don't want to clobber your files.)"
+  fi
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+printportion() {
+  awk "NR>=${2}&&NR<=${3}" "$1" > $4
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Main execution
+
+if [ "$#" -ne 6 ]; then
+  error 1 "Error: Wrong number of arguments. Expected 6, but found: $#"
+fi
+
+# ~ Grab parameters ~
+file1=$1
+start1=$2
+end1=$3
+
+file2=$4
+start2=$5
+end2=$6
+
+# ~ Check parameters ~
+assertexists $file1
+assertexists $file2
+
+# ~ Copy text regions to temp files and diff ~
+Temp1=".bdiff1"
+Temp2=".bdiff2"
+
+checktempfileexists $Temp1
+checktempfileexists $Temp2
+
+printportion "$file1" $start1 $end1 $Temp1
+printportion "$file2" $start2 $end2 $Temp2
+
+diff --ignore-all-space --ignore-blank-lines $Temp1 $Temp2
+
+# ~ Clean up ~
+rm $Temp1
+rm $Temp2
+
