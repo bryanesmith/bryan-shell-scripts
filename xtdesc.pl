@@ -1,0 +1,99 @@
+#!/usr/bin/perl -w
+
+# Copyright 2010, The Regents of The University of Michigan, All Rights Reserved
+#
+# Permission is hereby granted, free of charge, to any person
+# obtaining a copy of this software and associated documentation files
+# (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge,
+# publish, distribute, sublicense, and/or sell copies of the Software,
+# and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT.  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+# BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Prints out all values for attributes for all templates in an
+# XSLT file.
+#
+# Intended to be used with xtloc.pl for XSLT refactoring.
+#
+# Nov 8 2010
+#
+# Bryan Smith - bryanesmith@gmail.com
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+use strict;
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+sub usage() {
+
+  print <<MYUSAGE;
+
+USAGE
+  xtdesc.pl <file>
+
+DESCRIPTION
+  Prints out all the attributes for every function in an XSLT
+  file, one template per file.
+
+EXAMPLES
+  
+  xtdesc.pl sample.xsl
+    Prints out n lines of output, given n templates in sample.xsl.
+    Each line will be one or more attributes, such as name, match
+    or mode values.
+
+NOTES
+  * This only works if maximum of one template defined per line
+
+EXIT CODES
+  0: Exits normally
+  1: Input file not found
+
+MYUSAGE
+
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+sub myerror {
+  my ( $code, $msg ) = @_;
+  print "ERROR: $msg\n";
+  usage();
+  exit $code;
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+if ( @ARGV != 1 ) {
+  myerror 1, "Expecting one argument: the input file path.";
+}
+
+while (<>) {
+
+  if ( /\bxsl:template\b.*?\>/ ) {
+    my ( $tag ) = /\bxsl:template\b(.*?)\>/ ;
+    chomp $tag;
+
+    # Skip closing tags
+    if ( $tag ) {
+
+      my @values = ( $tag =~ m/=\"(.*?)\"/gx );
+
+      # Single-quote everything to avoid shell expansion for certain chars
+      @values = map { "'$_'" } @values;
+
+      print join ( ' ', @values ) . "\n";
+    }
+  }
+}
+
