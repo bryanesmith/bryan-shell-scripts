@@ -25,6 +25,12 @@ Collection of some of my more useful shell scripts.
 
     - cvs_unadded.sh: Prints any untracked changes recursively within current directory.
 
+  * Tools for machine representation
+    
+    - bin2dec: Converts unsigned binary number to decimal
+
+    - dec2bin: Converts positive decimal number to unsigned binary
+
   * bdiff.sh: Perform a diff between two blocks of text in two separate filesby line numbers.
 
   * Decrypt and encrypt file or directory using gpg, tar archiving and gzip compression.

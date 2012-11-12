@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+#
+# Convert unsigned binary number to decimal.
+#
+
+class InvalidBinaryNumber < RuntimeError; end
+
+def error(msg, code)
+  STDERR.puts msg
+  exit code
+end
+
+def bin2dec(bin)
+  raise InvalidBinaryNumber.new "Not a valid binary number: #{bin}" unless bin =~ /^[01]+$/
+  dec = 0
+  bin.length.times do |i|
+    dec += 2 ** i if bin[bin.length - 1 - i] == '1'
+  end
+  dec
+end
+
+error "Requires one argument, found: #{ARGV.length}", 1 unless ARGV.length == 1
+
+begin
+  puts bin2dec ARGV[0]
+rescue InvalidBinaryNumber => e 
+  error e.message, 1
+rescue Exception => e 
+  error e.message, 2 
+end
+

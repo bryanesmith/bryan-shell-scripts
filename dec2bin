@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+#
+# Convert positive decimal number to unsigned binary.
+#
+
+class InvalidDecimalNumber < RuntimeError; end
+
+def error(msg, code)
+  STDERR.puts msg
+  exit code
+end
+
+def dec2bin(dec)
+
+  raise InvalidDecimalNumber.new "Decimal should be positive integer: #{dec}" unless dec.is_a?(Integer) && dec >= 0
+
+  bin = String.new
+  while dec > 0 do
+    if dec % 2 == 1
+      bin << '1'
+    else 
+      bin << '0'
+    end
+    dec = dec / 2
+  end
+  bin.empty? ? '0' : bin.reverse
+end
+
+
+error "Requires one argument, found: #{ARGV.length}", 1 unless ARGV.length == 1
+
+dec = ARGV[0]
+error "Not a positive decimal number: #{dec}", 1 unless dec =~ /^\d+$/
+
+begin
+  puts dec2bin dec.to_i
+rescue InvalidDecimalNumber => e
+  error e.message, 1
+end
+
