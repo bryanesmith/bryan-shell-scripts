@@ -29,6 +29,8 @@ Collection of some of my more useful shell scripts.
     
     - bin2dec: Converts unsigned binary number to decimal
 
+    - bin2hex: Converts unsigned binary number to hexadecimal
+
     - dec2bin: Converts positive decimal number to unsigned binary
 
   * bdiff.sh: Perform a diff between two blocks of text in two separate filesby line numbers.

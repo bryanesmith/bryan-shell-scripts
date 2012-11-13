@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+#
+# Convert unsigned binary number to hexadecimal.
+#
+
+class InvalidBinaryNumber < RuntimeError; end
+
+def error(msg, code)
+  STDERR.puts msg
+  exit code
+end
+
+Bin2Hex = {
+  '0000' => '0' , '0001' => '1' , '0010' => '2' , '0011' => '3',
+  '0100' => '4' , '0101' => '5' , '0110' => '6' , '0111' => '7',
+  '1000' => '8' , '1001' => '9' , '1010' => 'A' , '1011' => 'B',
+  '1100' => 'C' , '1101' => 'D' , '1110' => 'E' , '1111' => 'F',
+}
+
+def bin2hex(bin)
+  raise InvalidBinaryNumber.new "Not a valid binary number: #{bin}" unless bin =~ /^[01]+$/
+
+  # Pad msd with zeros
+  mod = bin.length % 4
+  bin = '0' * (4 - mod ) + bin if mod > 0
+
+  hex = String.new
+  
+  bin.scan(/[01]{4}/).each do |nibble|
+    hex << Bin2Hex[nibble]
+  end
+
+  hex
+end
+
+error "Requires one argument, found: #{ARGV.length}", 1 unless ARGV.length == 1
+
+begin
+  puts bin2hex ARGV[0]
+rescue InvalidBinaryNumber => e 
+  error e.message, 1
+rescue Exception => e 
+  error e.message, 2 
+end
+
