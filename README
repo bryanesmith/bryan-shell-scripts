@@ -33,6 +33,8 @@ Collection of some of my more useful shell scripts.
 
     - dec2bin: Converts positive decimal number to unsigned binary
 
+    - hex2bin: Converts hexadecimal number to unsigned binary
+
   * bdiff.sh: Perform a diff between two blocks of text in two separate filesby line numbers.
 
   * Decrypt and encrypt file or directory using gpg, tar archiving and gzip compression.
