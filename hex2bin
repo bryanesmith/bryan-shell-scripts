@@ -17,9 +17,7 @@ Bin2Hex = {
 
 error "Requires one argument, found: #{ARGV.length}", 1 unless ARGV.length == 1
 
-hex = ARGV[0]
+error "Invalid hexadecimal number: #{ARGV[0]}", 1 unless ARGV[0] =~ /^[0-9a-f]+$/i
 
-error "Invalid hexadecimal number: #{hex}", 1 unless hex =~ /^[0-9a-f]+$/i
-
-puts hex.split(//).map { |digit| Bin2Hex[digit.upcase] }.join
+puts ARGV[0].split(//).map { |hex| Bin2Hex[hex.upcase] }.join
 
