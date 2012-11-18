@@ -35,6 +35,8 @@ Collection of some of my more useful shell scripts.
 
     - hex2bin: Converts hexadecimal number to unsigned binary
 
+    - xor: Calculates the exclusive or (xor) of two binary numbers of equal length
+
   * bdiff.sh: Perform a diff between two blocks of text in two separate filesby line numbers.
 
   * Decrypt and encrypt file or directory using gpg, tar archiving and gzip compression.

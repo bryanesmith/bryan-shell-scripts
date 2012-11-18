@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+#
+# Returns xor of two binary numbers of equal length.
+#
+
+def error(msg, code)
+  STDERR.puts msg
+  exit code
+end
+
+error "Requires two arguments of same length, found: #{ARGV.length}", 1 unless ARGV.length == 2
+
+error "Invalid binary number: #{ARGV[0]}", 1 unless ARGV[0] =~ /^[01]+$/i
+error "Invalid binary number: #{ARGV[1]}", 1 unless ARGV[1] =~ /^[01]+$/i
+error "Both binary numbers must be of same length", 1 unless ARGV[0].length == ARGV[1].length
+
+xor = String.new
+
+ARGV[0].length.times do |i|
+  xor << (ARGV[0][i].to_i ^ ARGV[1][i].to_i).to_s
+end
+
+puts xor
+
+
