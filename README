@@ -37,6 +37,8 @@ Collection of some of my more useful shell scripts.
 
     - xor: Calculates the exclusive or (xor) of two binary numbers of equal length
 
+    - ascii_code: Convert string to binary, decimal or hexadecimal ASCII code
+
   * bdiff.sh: Perform a diff between two blocks of text in two separate filesby line numbers.
 
   * Decrypt and encrypt file or directory using gpg, tar archiving and gzip compression.

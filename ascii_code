@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+#
+# Returns ascii code for string.
+#
+# Syntax: ascii_code [format] "A string."
+#
+# Optional format:
+#   --bin: binary
+#   --hex: hexadecimal (default)
+#   --dec: decimal
+#
+# Examples:
+# $ ascii_code "Hello, world"
+# 48656c6c6f2c20776f726c64
+# 
+# $ ascii_code --hex "Hello, world"
+# 48656c6c6f2c20776f726c64
+#
+# $ ascii_code --bin "Hello, world"
+# 1001000110010111011001101100110111110110010000011101111101111111001011011001100100
+#
+
+def error(msg, code)
+  STDERR.puts msg
+  exit code
+end
+
+error "Wrong number of arguments", 1 unless (1..2).include? ARGV.length
+
+output = :hex
+
+if ARGV.length == 2
+  output = ARGV[0][2..-1].to_sym
+end
+
+error "Unrecognized format, #{output.to_s}", 1 unless [ :hex, :dec, :bin ].include? output
+
+ARGV[-1].each_byte do |c|
+  if output == :hex
+    print c.to_s(16)
+  elsif output == :bin
+    print c.to_s(2)
+  elsif output == :dec
+    print c
+  end
+end
+
+puts
