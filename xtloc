@@ -39,7 +39,7 @@ sub usage() {
   print <<MYUSAGE;
 
 USAGE
-  xtloc.pl <file> <keyword> (<keyword> ...)
+  xtloc <file> <keyword> (<keyword> ...)
 
   Where keyword is the value of the name, match or mode attribute.
 
@@ -54,8 +54,8 @@ DESCRIPTION
   when a query is underspecified.
 
   This has important implications for tools and pipelines using
-  this utility. E.g., in xtchanges.sh, all templates in a
-  specified XSLT file are ran through xtloc.pl. If two templates
+  this utility. E.g., in xtchanges, all templates in a
+  specified XSLT file are ran through xtloc. If two templates
   have the same keywords but the latter is less specific, this
   tool will find the former.
 
@@ -65,11 +65,11 @@ DESCRIPTION
 
 EXAMPLES
  
-  xtolc.pl sample.xsl MyContentBody
+  xtolc sample.xsl MyContentBody
     Will print out line numbers for any template with name,
     match or mode value of 'MyContentBody'
 
-  xtolc.pl sample.xsl Item
+  xtolc sample.xsl Item
     Will print out line numbers for any template with name,
     match or mode value of 'MyContentBody'
 

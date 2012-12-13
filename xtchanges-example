@@ -29,7 +29,7 @@
 # 'different' or 'same'. (To aid with refactoring and
 # deduplication.)
 #
-# Requires xtchanges.sh and its dependencies, which
+# Requires xtchanges and its dependencies, which
 # are available for download:
 #
 # http://bryanesmith.com/documents/unix-shell-scripts/
@@ -46,7 +46,7 @@ compare() {
   mpubsfile="$mpubs/$1"
   textfile="$text/$1"
   output="${1}.xtchanges"
-  xtchanges.sh $mpubsfilel $textfile > $output
+  xtchanges $mpubsfilel $textfile > $output
 }
 
 cd $mpubs

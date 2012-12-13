@@ -26,7 +26,7 @@
 # Prints out all values for attributes for all templates in an
 # XSLT file.
 #
-# Intended to be used with xtloc.pl for XSLT refactoring.
+# Intended to be used with xtloc for XSLT refactoring.
 #
 # Nov 8 2010
 #
@@ -41,7 +41,7 @@ sub usage() {
   print <<MYUSAGE;
 
 USAGE
-  xtdesc.pl <file>
+  xtdesc <file>
 
 DESCRIPTION
   Prints out all the attributes for every function in an XSLT
@@ -49,7 +49,7 @@ DESCRIPTION
 
 EXAMPLES
   
-  xtdesc.pl sample.xsl
+  xtdesc sample.xsl
     Prints out n lines of output, given n templates in sample.xsl.
     Each line will be one or more attributes, such as name, match
     or mode values.

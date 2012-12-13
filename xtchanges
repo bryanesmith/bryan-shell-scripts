@@ -33,7 +33,7 @@ usage() {
   cat <<MYUSAGE
 
 USAGE
-  xtchanges.sh <file1> <file2>
+  xtchanges <file1> <file2>
 
 DESCRIPTION
   Given two XSLT template files, identifies and classifies all
@@ -45,7 +45,7 @@ DESCRIPTION
 
   Note that templates flagged as 'new' or 'different' are not
   guarenteed to be new or different; this is due to a limitation
-  in the first-match heuristic for xtloc.sh.
+  in the first-match heuristic for xtloc.
 
   However, templates flagged as 'same' do have a matching
   template. This tool is conservative about finding similar
@@ -55,16 +55,16 @@ DESCRIPTION
   for deduplicating XSLT when refactoring.
 
 EXAMPLES
-  xtchanges.sh example1.xsl example2.xsl
+  xtchanges example1.xsl example2.xsl
 
 DEPENDENCIES
   Requires all the following in path, available at
   [http://bryanesmith.com/documents/unix-shell-scripts/]:
  
-    * xtdesc.pl: Prints out attributes for all XSLT templates
-      (intended to be used as input for xtloc.pl)
-    * xtloc.pl: Prints out start and end line for XSLT template
-    * bdiff.sh: Diff algorithm on two blocks of text
+    * xtdesc: Prints out attributes for all XSLT templates
+      (intended to be used as input for xtloc)
+    * xtloc: Prints out start and end line for XSLT template
+    * bdiff: Diff algorithm on two blocks of text
 
 EXIT CODES
   0: Exitted normally
@@ -130,7 +130,7 @@ assertexists $xslt2
 
 TempFile=.xtdesc
 checktempfileexists $TempFile
-xtdesc.pl $xslt1 > $TempFile
+xtdesc $xslt1 > $TempFile
 
 # For every template in the first file, locate in second file
 exec 3< $TempFile
@@ -141,11 +141,11 @@ do
   # Set default read variable to keywords variable for readability
   keywords=$REPLY
 
-  lines1=`xtloc.pl $xslt1 $keywords`
-  assertnormalexit $? 'xtloc.pl'
+  lines1=`xtloc $xslt1 $keywords`
+  assertnormalexit $? 'xtloc'
    
-  lines2=`xtloc.pl $xslt2 $keywords`
-  assertnormalexit $? 'xtloc.pl'
+  lines2=`xtloc $xslt2 $keywords`
+  assertnormalexit $? 'xtloc'
 
   echo
 
@@ -160,8 +160,8 @@ do
 
   else
 
-    diffout=`bdiff.sh $xslt1 $lines1 $xslt2 $lines2`
-    assertnormalexit $? 'bdiff.sh'
+    diffout=`bdiff $xslt1 $lines1 $xslt2 $lines2`
+    assertnormalexit $? 'bdiff'
 
     if [ "$diffout" == '' ]; then
 

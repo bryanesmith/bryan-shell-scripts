@@ -32,17 +32,17 @@ usage() {
   cat <<MYUSAGE
 
 USAGE 
-  bdiff.sh [file] [line start] [line end] [file] [line start] [line end]
+  bdiff [file] [line start] [line end] [file] [line start] [line end]
 
 DESCRIPTION
   Compares two text file regions specified by line numbers.
 
 EXAMPLES
 
-  bdiff.sh file1 3 23 file2 7 27
+  bdiff file1 3 23 file2 7 27
     This will diff lines 3-23 in file1 with lines 7-27 in file2
 
-  bdiff.sh file1 file2 7 27
+  bdiff file1 file2 7 27
     This will fail with exit code of 1 since all parameters are
     required!
 

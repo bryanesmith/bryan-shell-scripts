@@ -25,7 +25,7 @@ usage() {
     cat <<MYUSAGE
 
 USAGE
-  ./backup-media.sh [media]
+  ./backup-media [media]
 
   Where [media] is the name of the directory/file you want to
   backup. (_Not_ the path to the directory. See NOTES for more 
