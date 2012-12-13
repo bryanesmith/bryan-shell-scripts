@@ -1,25 +1,114 @@
 #!/usr/bin/env ruby
 #
-# Returns xor of two binary numbers of equal length.
+# Returns xor of two numbers of equal length. 
 #
+# Numbers must be hexadecimal or binary.
+#
+# Hexadecimal if start with 0x. E.g., 0x23.
+#
+# Binary is default, though you can optionally use 0b. 
+# E.g., 0101 or 0b0101.
+#
+# You can specify an optional output flag:
+#   --as-bin: output result as binary (default)
+#   --as-hex: output result in hexadecimal
+#
+# Examples:
+# $ xor 1111 0101
+# 1010
+#
+# $ xor 0b1111 0b0101
+# 1010
+#
+# $ xor 0xF 0x5
+# 1010
+#
+# $ xor --as-hex 0xF 0x5
+# A
 
 def error(msg, code)
   STDERR.puts msg
   exit code
 end
 
-error "Requires two arguments of same length, found: #{ARGV.length}", 1 unless ARGV.length == 2
+Hex2Bin = {
+  '0' => '0000' , '1' => '0001' , '2' => '0010' , '3' => '0011' ,
+  '4' => '0100' , '5' => '0101' , '6' => '0110' , '7' => '0111' ,
+  '8' => '1000' , '9' => '1001' , 'A' => '1010' , 'B' => '1011' ,
+  'C' => '1100' , 'D' => '1101' , 'E' => '1110' , 'F' => '1111' ,
+}
 
-error "Invalid binary number: #{ARGV[0]}", 1 unless ARGV[0] =~ /^[01]+$/i
-error "Invalid binary number: #{ARGV[1]}", 1 unless ARGV[1] =~ /^[01]+$/i
-error "Both binary numbers must be of same length", 1 unless ARGV[0].length == ARGV[1].length
+def hex2bin( hex )
+  hex.split(//).map { |hex| Hex2Bin[hex.upcase] }.join
+end
+
+Bin2Hex = {
+  '0000' => '0' , '0001' => '1' , '0010' => '2' , '0011' => '3',
+  '0100' => '4' , '0101' => '5' , '0110' => '6' , '0111' => '7',
+  '1000' => '8' , '1001' => '9' , '1010' => 'A' , '1011' => 'B',
+  '1100' => 'C' , '1101' => 'D' , '1110' => 'E' , '1111' => 'F',
+}
+
+def bin2hex(bin)
+
+  # Pad msd with zeros
+  mod = bin.length % 4
+
+  bin = '0' * (4 - mod ) + bin if mod > 0
+
+  hex = String.new
+  
+  bin.scan(/[01]{4}/).each do |nibble|
+    hex << Bin2Hex[nibble]
+  end
+
+  hex
+end
+
+error "Wrong number of arguments.", 1 unless (2..3).include? ARGV.length
+
+one = ARGV[-2].dup
+two = ARGV[-1].dup
+
+output = :bin
+
+if ARGV.length == 3
+  error "Unrecognized option #{ARGV[0]}", 1 unless ["--as-bin", "--as-hex"].include? ARGV[0]
+  output = :hex if ARGV[0] == "--as-hex"
+end
+
+# If has binary prefix 0b, strip.
+one.slice!(0..1) if one =~ /^0b/
+two.slice!(0..1) if two =~ /^0b/
+
+# If not binary, internally represent as binary
+one = hex2bin( one[2..-1] ) if one =~ /^0x/
+two = hex2bin( two[2..-1] ) if two =~ /^0x/
+
+# Strip out insignificant 0s
+#one.slice!(0) while one =~ /^0/
+#two.slice!(0) while two =~ /^0/
+
+# If of uneven length, pad the smaller
+#if one.length != two.length
+#  one << "0" while one.length < two.length
+#  two << "0" while two.length < one.length
+#end
+
+error "Invalid input: #{one}", 1 unless one =~ /^[01]+$/i
+error "Invalid input: #{two}", 1 unless two =~ /^[01]+$/i
+error "Both binary numbers #{one}, #{two} must be of same length", 1 unless one.length == two.length
 
 xor = String.new
 
-ARGV[0].length.times do |i|
-  xor << (ARGV[0][i].to_i ^ ARGV[1][i].to_i).to_s
+one.length.times do |i|
+  xor << (one[i].to_i ^ two[i].to_i).to_s
 end
 
-puts xor
+if output == :bin
+  puts xor
+elsif output == :hex
+  puts bin2hex( xor )
+end
 
 

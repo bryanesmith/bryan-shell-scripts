@@ -35,7 +35,7 @@ Collection of some of my more useful shell scripts.
 
     - hex2bin: Converts hexadecimal number to unsigned binary
 
-    - xor: Calculates the exclusive or (xor) of two binary numbers of equal length
+    - xor: Calculates the exclusive or (xor) of number. Inputs and output can be hexadecimal, binary.
 
     - ascii_code: Convert string to binary, decimal or hexadecimal ASCII code
 
