@@ -14,10 +14,9 @@ def error(msg, code)
 end
 
 def euclidean_alg( a, b ) 
-  r = a % b
-  q = a / b
-  return b if r == 0
-  return euclidean_alg( b, r )
+  # Calculate remainder. Zero remainder is terminating condition.
+  r = a % b 
+  r == 0 ? b : euclidean_alg( b, r )
 end
 
 error "Wrong number of arguments.", 1 unless ARGV.length == 2
