@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+#
+# Returns the greatest common denominator of two numbers using
+# Euclidean algorithm.
+#
+# Note that Ruby's core class Integer has function gcd. E.g.,
+#
+# 1914.gcd(899) # =>29
+#
+
+def error(msg, code)
+  STDERR.puts msg
+  exit code
+end
+
+def euclidean_alg( a, b ) 
+  r = a % b
+  q = a / b
+  return b if r == 0
+  return euclidean_alg( b, r )
+end
+
+error "Wrong number of arguments.", 1 unless ARGV.length == 2
+
+a = ARGV[0].to_i
+b = ARGV[1].to_i
+
+error "Cannot find gcd with a zero term" unless a != 0 && b != 0
+
+a, b = b, a if b > a
+
+puts euclidean_alg( a, b )
+

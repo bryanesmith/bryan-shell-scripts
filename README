@@ -54,4 +54,7 @@ Collection of some of my more useful shell scripts.
 
     - catsu: sorts and uniquifies contents of file
 
-check-for-files-with-same-path.sh: looks in multiple directories for any files with identical relative paths.
+  * check-for-files-with-same-path.sh: looks in multiple directories for any files with identical relative paths.
+
+  * gcd: Greatest common denominator using Euclidean algorithm.
+
