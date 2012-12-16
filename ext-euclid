@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+#
+# Recursive implementation of extended Euclidean algorithm. 
+#
+# For finding x, y in ax + by = gcd(x, y).
+#
+
+def error(msg, code)
+  STDERR.puts msg
+  exit code
+end
+
+def ext_euclid(a, b)
+  if b == 0
+    return 1, 0
+  else
+    q = a / b
+    r = a % b
+    s, t = ext_euclid( b, r )
+    return t, s - q * t
+  end
+end
+
+error "Expected two arguments, found #{ARGV.length}", 1 unless ARGV.length == 2
+
+a = ARGV[0].to_i
+b = ARGV[1].to_i
+
+x, y = ext_euclid(a, b)
+puts x
+puts y
+

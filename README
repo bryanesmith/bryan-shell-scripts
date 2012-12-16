@@ -56,5 +56,8 @@ Collection of shell scripts, some of which are tautologically guaranteed to be m
 
   * check-for-files-with-same-path: looks in multiple directories for any files with identical relative paths.
 
-  * gcd: Greatest common denominator using Euclidean algorithm.
+  * Theoretical math
+    - gcd: Greatest common denominator using Euclidean algorithm.
+
+    - ext-euclid: Recursive implementation of extended Euclidean algorithm. For finding x, y in ax + by = gcd(x, y).
 
