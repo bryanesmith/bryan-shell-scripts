@@ -1,0 +1,72 @@
+#!/bin/bash
+#
+# Move file to ~/backup.
+#
+
+set -e
+set -u
+
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+usage() {
+  cat <<MYUSAGE
+
+USAGE
+  $0 [FILE] [ARCHIVE PATH]
+
+DESCRIPTION
+  Moves a file to ~/.archive
+ 
+PARAMETERS
+  [FILE]: the file you want to archive
+  [ARCHIVE PATH]: a path within ~/.archive to put the file
+
+EXAMPLES
+  $ archive foo/bar.txt docs/samples
+  Moves foo/bar.txt to ~/.archive/docs/samples/bar.txt
+
+ERRORS
+  0: Exit normally
+  1: Wrong number of arguments
+  2: File to archive not found
+  3: File exists in archive
+
+MYUSAGE
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+error() {
+  echo
+  echo "Error: $2"
+  echo
+  usage
+  exit $1
+}
+
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+# Handle args
+if [ "$#" != "2" ]; then
+  error 1 "Two arguments required, found: $#"
+fi
+
+ARCHIVE=~/.archive
+FILE="$1"
+DEST_DIR="${ARCHIVE}/$2"
+DEST="${DEST_DIR}/$(basename $FILE)"
+
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+if [ ! -e "$FILE" ]; then
+  error 2 "File not found: $FILE"
+fi
+
+if [ -f $DEST ]; then
+  error 3 "File already exists: $DEST"
+fi
+
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+if [ ! -d $DEST_DIR ]; then
+  mkdir -p $DEST_DIR
+fi
+
+# - - - - - - - - - - - - - - - - - - - - - - - - -
+mv $FILE $DEST
+
