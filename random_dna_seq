@@ -10,11 +10,8 @@ end
 
 error "Requires one argument, found: #{ARGV.length}", 1 unless ARGV.length == 1
 
-dec = ARGV[0]
-error "Not a positive decimal number: #{dec}", 1 unless dec =~ /^\d+$/
+error "Not a positive decimal number: #{dec}", 1 unless ARGV[0] =~ /^\d+$/
 
-dec.to_i.times do |i|
-  putc "AGTC".chars.to_a.sample
-end
+ARGV[0].to_i.times { putc "AGTC".chars.to_a.sample }
 puts
 
