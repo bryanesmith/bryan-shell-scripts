@@ -1,0 +1,29 @@
+#!/usr/bin/env node
+
+/* 
+ * Compact JSON using JSON-LD context. 
+ * 
+ * Dependency: 
+ *   $ node install jsonld
+ */
+
+var jsonld = require('jsonld');
+
+const args = process.argv.slice(2);
+if (args.length != 2) {
+  console.error("Expecting 2 arguments: <json path> <context path>");  
+  process.exit(1);
+}
+
+const json = require(`${process.cwd()}/${args[0]}`);
+const context = require(`${process.cwd()}/${args[1]}`);
+
+jsonld.compact(json, context, (err,out) => {
+    if (err) {
+        console.error(`Error: ${err}`);
+        process.exit(2);
+    } else {
+        console.log(JSON.stringify(out, null, 2));
+    }
+});
+
