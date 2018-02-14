@@ -1,0 +1,82 @@
+#!/usr/bin/env ruby
+#
+# Outer joins two CSV files on specified columns.
+#
+
+require 'csv'
+require 'set'
+
+def error(msg, code)
+  STDERR.puts msg
+  STDERR.puts
+  STDERR.puts "USAGE: join-csv <path-to-csv-1> <key-col-1> <path-to-csv-2> <key-col-2>"
+  STDERR.puts
+  STDERR.puts "  Both CSV files must contain exactly one header row and must have at least one data row."
+  STDERR.puts
+  exit code
+end
+
+def check_file(file)
+  error "File not found: #{file}", 2 unless File.file?(file)
+end
+
+def read(file)
+  data = CSV.read(file, { encoding: "UTF-8", headers: true, header_converters: :symbol, converters: :all})
+  return data.map { |d| d.to_hash }
+end
+
+def check_col(file, csv, col)
+  error "File #{file} doesn't contain column: #{col}", 3 unless csv[0].key?(col)
+end
+
+def escape(row)
+  return row.map do |v|
+    if v.is_a? String
+      "\"#{v}\""
+    else
+      v
+    end
+  end
+end
+
+error "Wrong number of arguments", 1 unless ARGV.length == 4
+
+file1 = ARGV[0]
+key1 = ARGV[1].downcase.to_sym
+file2 = ARGV[2]
+key2 = ARGV[3].downcase.to_sym
+
+check_file(file1)
+check_file(file2)
+
+csv1 = read(file1)
+csv2 = read(file2)
+
+check_col(file1, csv1, key1)
+check_col(file2, csv2, key2)
+
+# write headers
+puts csv1[0].keys.concat(csv2[0].keys).join ","
+
+# write rows from first or both
+visited = Set.new
+csv1.each do |row1|
+  id = row1[key1]
+  row2 = csv2.find {|r| r[key2] == id }
+
+  if row2 == nil
+    puts escape(row1.values).join(",") + "," * (csv2[0].keys.length)
+  else
+    puts escape(row1.values).join(",") + "," + escape(row2.values).join(",")
+  end
+
+  visited.add(id)
+end
+
+# write rows for second
+csv2.each do |row2|
+  id = row2[key2]
+  if (!visited.include?(id))
+    puts "," * (csv1[0].keys.length) + escape(row2.values).join(",")
+  end
+end
